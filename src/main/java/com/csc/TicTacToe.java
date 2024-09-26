@@ -47,6 +47,7 @@ public class TicTacToe {
   }
   
   private boolean isValidMove(int board_index) {
+    if (board_index < 0 || board_index >= 9) return false;
     return board[board_index] == 0;
   }
   
@@ -55,15 +56,20 @@ public class TicTacToe {
   private int questionPlayer() {
     Scanner scanner = new Scanner(System.in);
     while (true) {
-      System.out.print("\n\n" + getPlayerString(current_player) + " - where would you like to move? ");
-      int move = scanner.nextInt();
-      System.out.println();
+      System.out.print("\n" + getPlayerString(current_player) + " - where would you like to move? ");
       
-      if (isValidMove(move)) {
-        return move;
+      if (scanner.hasNextInt()) {
+        int move = scanner.nextInt();
+        System.out.println();
+        
+        if (isValidMove(move)) return move;
+        System.out.print("That move is invalid!");
+      } else {
+        while (!scanner.hasNextInt()) {
+          scanner.next();
+          System.out.println("Invalid input! Must be integer.");
+        }
       }
-      
-      System.out.print("That move is invalid!");
     }
   }
   
