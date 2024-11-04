@@ -1,6 +1,7 @@
 package com.csc;
 
 import java.util.Scanner;
+import java.util.concurrent.ThreadLocalRandom;
 
 // Your code goes here!
 public class TicTacToe {
@@ -15,9 +16,20 @@ public class TicTacToe {
   
   private int current_player = 1;
   
-  private static String getPlayerString(int current_player) {
-    if (current_player == 1) return "Player one";
-    return "Player two";
+  private boolean has_human_opponent = true;
+  
+  private void reset() {
+    for(int i = 0; i < 9; i++) {
+      board[i] = 0;
+    }
+    
+    current_player = 1;
+  }
+  
+  private String getPlayerString(int player) {
+    if (player == 1) return "Player one";
+    if (has_human_opponent) return "Player two";
+    return "Computer";
   }
   
   private void printBoard() {
@@ -54,9 +66,13 @@ public class TicTacToe {
   // returns an integer corresponding to the board index of the move.
   // guaranteed to be a valid move.
   private int questionPlayer() {
+    if (!has_human_opponent && current_player == 2) {
+      return randomMove();
+    }
+    
     Scanner scanner = new Scanner(System.in);
     while (true) {
-      System.out.print("\n" + getPlayerString(current_player) + " - where would you like to move? ");
+      System.out.print(getPlayerString(current_player) + " - where would you like to move? ");
       
       if (scanner.hasNextInt()) {
         int move = scanner.nextInt();
@@ -71,6 +87,14 @@ public class TicTacToe {
         }
       }
     }
+  }
+  
+  private int randomMove() {
+    System.out.println("Computer thinking...");
+    int randomNum = ThreadLocalRandom.current().nextInt(0, 10);
+    while (!isValidMove(randomNum)) randomNum = ThreadLocalRandom.current().nextInt(0, 10);
+    
+    return randomNum;
   }
   
   // 0: no win
@@ -213,35 +237,98 @@ public class TicTacToe {
     }
   }
   
+  private int selectOption() {
+    Scanner scanner = new Scanner(System.in);
+    while (true) {
+      System.out.print("> ");
+      
+      if (scanner.hasNextInt()) {
+        int selection = scanner.nextInt();
+        System.out.println();
+        
+        if (selection == 1 || selection == 2) return selection;
+        System.out.print("That selection is invalid!");
+      } else {
+        while (!scanner.hasNextInt()) {
+          scanner.next();
+          System.out.println("Invalid input! Must be integer.\n>");
+        }
+      }
+    }
+  }
+  
+  private void mainMenu() {
+    System.out.println("Welcome to Tic-Tac-Toe! Who is playing? ");
+    System.out.println("1. human vs. human");
+    System.out.println("2. human vs. computer");
+    
+    int players = selectOption();
+    if (players == 1) has_human_opponent = true;
+    else has_human_opponent = false;
+  }
+  
+  // returns true if the program should exit.
+  private boolean exitMenu() {
+    System.out.println("Would you like to play another game?");
+    System.out.println("1. Yes");
+    System.out.println("2. No");
+    
+    if (selectOption() == 1) {
+      return false;
+    }
+    
+    System.out.println("Have a good day!");
+    return true;
+  }
+  
+  private void printWinMessageOrSwap(int winning_player) {
+    if (winning_player == 0) {
+      // swap players
+      current_player = (current_player % 2) + 1;
+      return;
+    }
+    
+    System.out.println();
+    System.out.println();
+    
+    // draw
+    if (winning_player == 3) {
+      System.out.println("It's a draw!");
+      return;
+    }
+    
+    // player win
+    System.out.println(getPlayerString(winning_player) + " wins!");
+  }
+  
   private void gameLoop() {
-    printBoard();
+    mainMenu();
     
     while (true) {
-      
-      int move = questionPlayer();
-      computeMove(move);
       printBoard();
       
-      int winning_player = checkIfWin();
-      
-      if (winning_player == 0) {
-        // swap players
-        current_player = (current_player % 2) + 1;
-        continue;
+      while (true) {
+        System.out.println();
+        System.out.println();
+        int move = questionPlayer();
+        System.out.println();
+        
+        computeMove(move);
+        printBoard();
+        
+        int winning_player = checkIfWin();
+        printWinMessageOrSwap(winning_player);
+        
+        // if someone won
+        if (winning_player != 0) {
+          break;
+        }
       }
       
-      System.out.println();
-      System.out.println();
+      boolean should_exit = exitMenu();
+      if (should_exit) break;
+      reset();
       
-      // draw
-      if (winning_player == 3) {
-        System.out.println("It's a draw!");
-        break;
-      }
-      
-      // player win
-      System.out.println(getPlayerString(winning_player) + " wins!");
-      break;
     }
   }
   
