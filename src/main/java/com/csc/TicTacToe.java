@@ -6,8 +6,8 @@ import java.util.concurrent.ThreadLocalRandom;
 // Your code goes here!
 public class TicTacToe {
   // 0 = unset
-  // 1 = x
-  // 2 = o
+  // 1 = player 1
+  // 2 = player 2
   private int[] board = {
     0, 0, 0, 
     0, 0, 0, 
@@ -17,6 +17,9 @@ public class TicTacToe {
   private int current_player = 1;
   
   private boolean has_human_opponent = true;
+  
+  private String player1mark = "";
+  private String player2mark = "";
   
   private void reset() {
     for(int i = 0; i < 9; i++) {
@@ -40,9 +43,9 @@ public class TicTacToe {
         if (board[board_index] == 0) {
           System.out.print(String.format(" %d", board_index));
         } else if (board[board_index] == 1) {
-          System.out.print(String.format(" X", board_index));
+          System.out.print(String.format(" " + player1mark, board_index));
         } else {
-          System.out.print(String.format(" O", board_index));
+          System.out.print(String.format(" " + player2mark, board_index));
         }
         
         // if we are at a column before the last column
@@ -66,6 +69,7 @@ public class TicTacToe {
   // returns an integer corresponding to the board index of the move.
   // guaranteed to be a valid move.
   private int questionPlayer() {
+    // if the computer should make a move
     if (!has_human_opponent && current_player == 2) {
       return randomMove();
     }
@@ -79,7 +83,7 @@ public class TicTacToe {
         System.out.println();
         
         if (isValidMove(move)) return move;
-        System.out.print("That move is invalid!");
+        System.out.println("That move is invalid!");
       } else {
         while (!scanner.hasNextInt()) {
           scanner.next();
@@ -257,8 +261,36 @@ public class TicTacToe {
     }
   }
   
+  private void chooseMark() {
+    Scanner scanner = new Scanner(System.in);
+    
+    System.out.print("Welcome to Tic-Tac-Toe! Choose mark for player 1: ");
+    
+    boolean has_chosen_invalid_yet = false;
+    while(player1mark.length() < 1 || player1mark.length() > 1) {
+      if (has_chosen_invalid_yet) {
+        System.out.print("Invalid mark choice! Please try again: ");
+      }
+      player1mark = scanner.nextLine();
+      has_chosen_invalid_yet = true;
+    }
+    
+    has_chosen_invalid_yet = false;
+    
+    System.out.print("Choose mark for player 2: ");
+    while(player2mark.length() < 1 || player2mark.length() > 1 || player1mark.equals(player2mark)) {
+      if (has_chosen_invalid_yet) {
+        System.out.print("Invalid mark choice! Please try again: ");
+      }
+      player2mark = scanner.nextLine();
+      has_chosen_invalid_yet = true;
+    }
+  }
+  
   private void mainMenu() {
-    System.out.println("Welcome to Tic-Tac-Toe! Who is playing? ");
+    chooseMark();
+    
+    System.out.println("Who is playing? ");
     System.out.println("1. human vs. human");
     System.out.println("2. human vs. computer");
     
